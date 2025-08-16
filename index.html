@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Forever & Always</title>
-  <meta name="description" content="Minimal black love page with fade-in message, typed line + heartbeat, and a small visible YouTube lyric video." />
+  <meta name="description" content="Minimal black love page with click-to-begin, fade-in message, typed line + heartbeat, and a small visible YouTube lyric video." />
   <style>
     :root{ --bg:#000; --fg:#f5f5f5; --accent:red; --muted:#cfcfcf }
     *{ box-sizing:border-box }
@@ -15,9 +15,10 @@
       font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       padding:24px;
     }
-    main{ width:min(860px,95vw); text-align:center; line-height:1.65 }
+    main{ width:min(860px,95vw); text-align:center; line-height:1.65; opacity:0; transition:opacity .6s ease }
+    main.show{ opacity:1; }
 
-    .ucapan{ font-size:clamp(9px,2.4vw,18px); text-align:justify; opacity:0; transition:opacity 1.2s ease }
+    .ucapan{ font-size:clamp(12px,2.4vw,18px); text-align:justify; opacity:0; transition:opacity 1s ease }
     .ucapan.show{ opacity:1 }
 
     .love{ margin-top:18px; font-size:clamp(18px,3vw,24px) }
@@ -34,12 +35,14 @@
     /* === MINI PLAYER (video + button inline) === */
     .mini {
       position: fixed; right: 14px; bottom: 14px; z-index: 20;
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px; border-radius: 14px; border: 1px solid #2a2a2a;
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px; border-radius: 14px; border: 1px solid #2a2a2a;
       background: rgba(10,10,10,.75); backdrop-filter: blur(6px);
       box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      opacity:0; transform: translateY(8px); transition: .35s ease;
     }
-    .thumb { width: 220px; aspect-ratio: 16 / 9; position: relative; }
+    .mini.show{ opacity:1; transform:none; }
+    .thumb { width: 200px; aspect-ratio: 16 / 9; position: relative; }
     .thumb iframe {
       position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 10px;
     }
@@ -47,16 +50,38 @@
       padding:8px 12px; border-radius:999px; border:1px solid #444; background:#111; color:#fff;
       font-size:14px; cursor:pointer; opacity:.95; white-space:nowrap;
     }
-
     @media (max-width: 420px){
-      .thumb { width: 180px; }
+      .thumb { width: 170px; }
+    }
+
+    /* === CLICK-TO-BEGIN OVERLAY === */
+    #gate{
+      position: fixed; inset: 0; z-index: 50;
+      display: grid; place-items: center;
+      background: radial-gradient(1200px 1200px at 50% 40%, rgba(255,255,255,.06), rgba(0,0,0,.9));
+    }
+    .gate-card{
+      background:#0a0a0a; border:1px solid #2a2a2a; border-radius:14px; padding:20px 22px; text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.5);
+    }
+    .gate-card h2{ margin:0 0 10px; font-size:20px; letter-spacing:.2px }
+    .gate-card p{ margin:0 0 14px; font-size:14px; color:#cfcfcf }
+    #begin{
+      padding:10px 16px; border-radius:10px; border:1px solid #444; background:#111; color:#fff; cursor:pointer; font-weight:700;
     }
   </style>
 </head>
 <body>
-  <main>
+  <!-- CLICK-TO-BEGIN -->
+  <div id="gate">
+    <div class="gate-card">
+      <button id="begin">Assalamualaikum syg, click sitok pleasee 😝💖</button>
+    </div>
+  </div>
+
+  <main id="content">
     <div id="ucapan" class="ucapan">
-To my sayang hensem,<br>
+To my sayang hensem, MSMA<br>
 Thanks for being always sabar for me & terima mek in your life. Sikda lain yang mek boleh padah, mek bena bena sayangkan ktk. Thank you for evrything and kmk minta maaf dari sudut hati mek paling dalam untuk semua salah silap mek ke sayang selama kita kenal dan in future kelak. Mek minta maaf sik sempurna untuk syg, dan harap syg bersabar dengan mek. Mek hargai semua yang syg beri ke kmk dari segi kasih syg, caring, ilmu, nasihat, teguran dan semua benda yang syg pernah bagi even sekecik particles. Semua ya dah cukup dan sempurna sbg bukti yg ktk syg kmk. Kmk truly hargai semua ya, semua usaha syg dan sentiasa ingat semua moment kita. Terima kasih untuk semua dan selalu ada untuk kmk. Kmk sentiasa doakan kebahagiaan syg, rasa mek ke syg tetap sama dan sentiasa syg. even kita ok or sik okay sperti mek padah ke syg selalu, i love you always & forever. Jaga diri, jaga hati, jaga kesihatan & jaga mata utk mek. Mek mok syg utamakan diri syg juak & syg diri syg juak cuz mek love you so much & rindu syg setiap detik. Apa pun jadi, mek sentiasa ada untuk syg sentiasa & bila-bila.
     </div>
 
@@ -65,11 +90,11 @@ Thanks for being always sabar for me & terima mek in your life. Sikda lain yang 
   </main>
 
   <!-- MINI PLAYER: video + button inline -->
-  <div class="mini">
+  <div class="mini" id="mini">
     <div class="thumb">
       <iframe
         id="lyric"
-        src="https://www.youtube-nocookie.com/embed/ie-mXf5Lon8?autoplay=1&mute=1&start=45&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=ie-mXf5Lon8&enablejsapi=1"
+        src="https://www.youtube-nocookie.com/embed/ie-mXf5Lon8?autoplay=0&mute=1&start=45&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=ie-mXf5Lon8&enablejsapi=1"
         allow="autoplay; encrypted-media; picture-in-picture"
         title="Lyric video">
       </iframe>
@@ -78,11 +103,26 @@ Thanks for being always sabar for me & terima mek in your life. Sikda lain yang 
   </div>
 
   <script>
-    // Fade-in ucapan
+    // Utilities
     function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
-    setTimeout(()=>{ document.getElementById('ucapan').classList.add('show'); }, 500);
+    const frame = document.getElementById('lyric');
+    const btn   = document.getElementById('soundBtn');
+    const mini  = document.getElementById('mini');
+    const gate  = document.getElementById('gate');
+    const main  = document.getElementById('content');
+    let isMuted = true;
 
-    // Type love line + heartbeat + signature
+    // YT postMessage helper
+    function yt(cmd, args=[]){
+      try{ frame.contentWindow.postMessage(JSON.stringify({event:'command', func:cmd, args}), '*'); }catch(e){}
+    }
+    function setMuted(m){
+      isMuted = m;
+      if(m){ yt('mute'); btn.textContent = '🔊 Unmute'; }
+      else { yt('unMute'); yt('setVolume', [100]); btn.textContent = '🔈 Mute'; }
+    }
+
+    // Typing line + heartbeat + signature
     async function typeLove(){
       const el = document.getElementById('love');
       const text = 'I love you — forever & always ';
@@ -99,31 +139,26 @@ Thanks for being always sabar for me & terima mek in your life. Sikda lain yang 
       await sleep(600);
       document.getElementById('sig').classList.add('show');
     }
-    setTimeout(typeLove, 3000);
 
-    // ========= Mute / Unmute handling (YouTube via postMessage) =========
-    const btn = document.getElementById('soundBtn');
-    const frame = document.getElementById('lyric');
-    let isMuted = true;
+    // Click-to-begin flow
+    document.getElementById('begin').addEventListener('click', async ()=>{
+      // Reveal content
+      gate.style.display = 'none';
+      main.classList.add('show');
+      setTimeout(()=> document.getElementById('ucapan').classList.add('show'), 60);
+      setTimeout(typeLove, 1200);
 
-    function yt(cmd, args=[]){
-      try{ frame.contentWindow.postMessage(JSON.stringify({event:'command', func:cmd, args}), '*'); }catch(e){}
-    }
-    function setMuted(m){
-      isMuted = m;
-      if(m){ yt('mute'); btn.textContent = '🔊 Unmute'; }
-      else { yt('unMute'); yt('setVolume', [100]); btn.textContent = '🔈 Mute'; }
-    }
+      // Start video with sound (allowed after user interaction)
+      yt('playVideo');
+      setMuted(false); // unmute + volume 100
+      mini.classList.add('show');
+    });
 
+    // Button toggle
     btn.addEventListener('click', ()=> setMuted(!isMuted));
 
-    // Satu tap di mana-mana untuk bunyikan cepat (optional)
-    function oneTap(){ if(isMuted){ setMuted(false); } document.removeEventListener('pointerdown', oneTap, {once:true}); }
-    document.addEventListener('pointerdown', oneTap, {once:true});
-
-    // Pastikan video play (autoplay muted) sebaik load
-    window.addEventListener('load', ()=>{ yt('playVideo'); setMuted(true); });
+    // Safety nudge on load (keeps it paused/muted until click)
+    window.addEventListener('load', ()=>{ yt('pauseVideo'); setMuted(true); });
   </script>
 </body>
 </html>
-
