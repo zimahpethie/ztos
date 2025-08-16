@@ -20,14 +20,6 @@
     .ucapan{ font-size:clamp(12px,2.4vw,18px); text-align:justify; opacity:0; transition:opacity 1.2s ease }
     .ucapan.show{ opacity:1 }
 
-    /* Video kecil 16:9 */
-    .vid { margin:16px auto 8px; width:min(240px, 90vw); position:relative; }
-    .vid::before { content:""; display:block; padding-top:56.25%; } /* 16:9 */
-    .vid iframe {
-      position:absolute; inset:0; width:100%; height:100%; border:0;
-      border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-
     .love{ margin-top:18px; font-size:clamp(18px,3vw,24px) }
 
     .heartbeat{ display:inline-block; color:var(--accent); font-size:1.4em; animation:beat 2.2s infinite; transform-origin:center }
@@ -39,18 +31,32 @@
     .caret{ display:inline-block; width:.6ch; height:1em; translate:0 .15em; background:var(--fg); animation:blink 1s step-end infinite }
     @keyframes blink{ 50%{opacity:0} }
 
-    /* Butang mute/unmute */
+    /* === MINI PLAYER (video + button inline) === */
+    .mini {
+      position: fixed; right: 14px; bottom: 14px; z-index: 20;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px; border-radius: 14px; border: 1px solid #2a2a2a;
+      background: rgba(10,10,10,.75); backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    }
+    .thumb { width: 220px; aspect-ratio: 16 / 9; position: relative; }
+    .thumb iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 10px;
+    }
     #soundBtn{
-      position:fixed; right:14px; bottom:14px;
       padding:8px 12px; border-radius:999px; border:1px solid #444; background:#111; color:#fff;
-      font-size:14px; cursor:pointer; opacity:.95;
+      font-size:14px; cursor:pointer; opacity:.95; white-space:nowrap;
+    }
+
+    @media (max-width: 420px){
+      .thumb { width: 180px; }
     }
   </style>
 </head>
 <body>
   <main>
     <div id="ucapan" class="ucapan">
-To my sayang hensem, MSMA<br>
+To my sayang hensem,<br>
 Thanks for being always sabar for me & terima mek in your life. Sikda lain yang mek boleh padah, mek bena bena sayangkan ktk. Thank you for evrything and kmk minta maaf dari sudut hati mek paling dalam untuk semua salah silap mek ke sayang selama kita kenal dan in future kelak. Mek minta maaf sik sempurna untuk syg, dan harap syg bersabar dengan mek. Mek hargai semua yang syg beri ke kmk dari segi kasih syg, caring, ilmu, nasihat, teguran dan semua benda yang syg pernah bagi even sekecik particles. Semua ya dah cukup dan sempurna sbg bukti yg ktk syg kmk. Kmk truly hargai semua ya, semua usaha syg dan sentiasa ingat semua moment kita. Terima kasih untuk semua dan selalu ada untuk kmk. Kmk sentiasa doakan kebahagiaan syg, rasa mek ke syg tetap sama dan sentiasa syg. even kita ok or sik okay sperti mek padah ke syg selalu, i love you always & forever. Jaga diri, jaga hati, jaga kesihatan & jaga mata utk mek. Mek mok syg utamakan diri syg juak & syg diri syg juak cuz mek love you so much & rindu syg setiap detik. Apa pun jadi, mek sentiasa ada untuk syg sentiasa & bila-bila.
     </div>
 
@@ -58,17 +64,18 @@ Thanks for being always sabar for me & terima mek in your life. Sikda lain yang 
     <p id="sig" class="sig">— From your sayang comel, ZP 😝😘 —</p>
   </main>
 
-  <!-- Butang toggle bunyi -->
-  
-    <!-- Video lirik kecil (autoplay muted, loop, start 45s) -->
-    <div class="vid">
+  <!-- MINI PLAYER: video + button inline -->
+  <div class="mini">
+    <div class="thumb">
       <iframe
         id="lyric"
         src="https://www.youtube-nocookie.com/embed/ie-mXf5Lon8?autoplay=1&mute=1&start=45&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=ie-mXf5Lon8&enablejsapi=1"
         allow="autoplay; encrypted-media; picture-in-picture"
         title="Lyric video">
-      </iframe><button id="soundBtn">🔊 Unmute</button>
+      </iframe>
     </div>
+    <button id="soundBtn">🔊 Unmute</button>
+  </div>
 
   <script>
     // Fade-in ucapan
@@ -97,44 +104,25 @@ Thanks for being always sabar for me & terima mek in your life. Sikda lain yang 
     // ========= Mute / Unmute handling (YouTube via postMessage) =========
     const btn = document.getElementById('soundBtn');
     const frame = document.getElementById('lyric');
-    let isMuted = true; // kita maintain state sendiri
+    let isMuted = true;
 
     function yt(cmd, args=[]){
-      try{
-        frame.contentWindow.postMessage(JSON.stringify({event:'command', func:cmd, args}), '*');
-      }catch(e){}
+      try{ frame.contentWindow.postMessage(JSON.stringify({event:'command', func:cmd, args}), '*'); }catch(e){}
     }
-
     function setMuted(m){
       isMuted = m;
-      if(m){
-        yt('mute'); btn.textContent = '🔊 Unmute';
-      }else{
-        yt('unMute'); yt('setVolume', [100]); btn.textContent = '🔈 Mute';
-      }
+      if(m){ yt('mute'); btn.textContent = '🔊 Unmute'; }
+      else { yt('unMute'); yt('setVolume', [100]); btn.textContent = '🔈 Mute'; }
     }
 
-    // Bila user klik butang → toggle
-    btn.addEventListener('click', ()=>{
-      setMuted(!isMuted);
-    });
+    btn.addEventListener('click', ()=> setMuted(!isMuted));
 
     // Satu tap di mana-mana untuk bunyikan cepat (optional)
-    function oneTap(){
-      if(isMuted){ setMuted(false); }
-      document.removeEventListener('pointerdown', oneTap, {once:true});
-    }
+    function oneTap(){ if(isMuted){ setMuted(false); } document.removeEventListener('pointerdown', oneTap, {once:true}); }
     document.addEventListener('pointerdown', oneTap, {once:true});
 
     // Pastikan video play (autoplay muted) sebaik load
-    // (kebiasaannya dah play, tapi kita “nudge” sikit)
-    window.addEventListener('load', ()=>{
-      yt('playVideo');
-      setMuted(true); // pastikan state & label betul
-    });
+    window.addEventListener('load', ()=>{ yt('playVideo'); setMuted(true); });
   </script>
 </body>
 </html>
-
-
-
